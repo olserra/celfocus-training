@@ -1,4 +1,4 @@
-package springbootbuyitem;
+package com.training.springbootbuyitem;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

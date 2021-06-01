@@ -1,10 +1,10 @@
 package com.training.springbootbuyitem.service;
 
 import com.training.springbootbuyitem.entity.model.Item;
-import com.training.springbootbuyitem.entity.request.NotificationRequest;
 import com.training.springbootbuyitem.enums.EnumEntity;
 import com.training.springbootbuyitem.enums.EnumItemState;
 import com.training.springbootbuyitem.error.EntityNotFoundException;
+import com.training.springbootbuyitem.error.StockNotAvailableException;
 import com.training.springbootbuyitem.repository.ItemRepository;
 import com.training.springbootbuyitem.utils.properties.ItemStorageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,6 @@ public class ItemService implements IItemService {
 				new EntityNotFoundException(EnumEntity.ITEM.name(), id));
 	}
 
-	// TODO - ex 10
 	@Override
 	public List<Item> get(List<Long> id) {
 		return new ArrayList<>();
@@ -56,10 +55,11 @@ public class ItemService implements IItemService {
 		itemRepository.delete(get(id));
 	}
 
+
 	@Override
 	public Item update(Item item) {
 		Item persistedItem = get(item.getItemUid());
-		if (!StringUtils.hasText(item.getName())) {
+		if (!StringUtils.isEmpty(item.getName())) {
 			persistedItem.setName(item.getName());
 		}
 		if (!StringUtils.isEmpty(item.getDescription())) {
@@ -74,7 +74,7 @@ public class ItemService implements IItemService {
 		if (item.getPriceTag() != null && item.getPriceTag().longValue() >= 0.0) {
 			persistedItem.setPriceTag(item.getPriceTag());
 		}
-		return persistedItem;
+		return itemRepository.save(persistedItem);
 	}
 
 	@Override
@@ -83,24 +83,31 @@ public class ItemService implements IItemService {
 		return itemRepository.save(item);
 	}
 
-
 	@Override
 	public void restock(Long id, Integer quantity) {
 		// TODO
 	}
 
-	//TODO create the dispatch method that use "quantity"  items from item stock for the item represented by id
 	@Override
 	public void dispatch(Long id, Integer quantity) {
 		Item item = get(id);
+		checkItemAvailability(item, quantity);
 		item.setStock(item.getStock().subtract(BigInteger.valueOf(quantity)));
+		item.setReservedStock(item.getStock().subtract(BigInteger.valueOf(quantity)));
 		save(item);
+	}
+
+	private void checkItemAvailability(Item item, Integer quantity) {
+		if (item.getStock().compareTo(BigInteger.valueOf(quantity)) < 0) {
+			throw new StockNotAvailableException(item.getName());
+		}
 	}
 
 	@Override
 	public void block(Long id, Integer quantity) {
 		Item item = get(id);
 		item.setStock(item.getStock().subtract(BigInteger.valueOf(quantity)));
+		item.setReservedStock(item.getReservedStock().add(BigInteger.valueOf(quantity)));
 		save(item);
 	}
 }

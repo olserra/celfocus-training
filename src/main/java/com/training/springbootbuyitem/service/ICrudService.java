@@ -1,7 +1,5 @@
 package com.training.springbootbuyitem.service;
 
-import com.training.springbootbuyitem.entity.model.Item;
-
 import java.util.List;
 
 public interface ICrudService<T extends Object> {

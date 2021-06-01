@@ -21,4 +21,5 @@ public class BuyItemConstant {
 	public static final String LOGGING_HANDLER_OUTBOUND_MSG = "Responded with Status [%s] at [%s]";
 	public static final String LOGGING_HANDLER_PROCESS_TIME_MSG = "Total processing time [%s] ms";
 
+    public static final String STOCK_NOT_AVAILABLE_MSG = "Item {%s} not available in stock";
 }

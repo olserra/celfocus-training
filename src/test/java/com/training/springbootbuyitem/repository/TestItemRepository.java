@@ -1,4 +1,4 @@
-package springbootbuyitem.repository;
+package com.training.springbootbuyitem.repository;
 
 import com.training.springbootbuyitem.BuyItemApplication;
 import com.training.springbootbuyitem.entity.model.Item;

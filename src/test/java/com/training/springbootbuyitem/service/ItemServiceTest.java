@@ -1,4 +1,4 @@
-package springbootbuyitem.service;
+package com.training.springbootbuyitem.service;
 
 import com.training.springbootbuyitem.repository.ItemRepository;
 import com.training.springbootbuyitem.service.ItemService;

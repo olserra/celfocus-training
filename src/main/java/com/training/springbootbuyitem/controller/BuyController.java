@@ -1,13 +1,14 @@
 package com.training.springbootbuyitem.controller;
 
 import com.training.springbootbuyitem.entity.model.Item;
+import com.training.springbootbuyitem.entity.model.User;
 import com.training.springbootbuyitem.entity.request.CreateItemRequestDto;
+import com.training.springbootbuyitem.entity.request.CreateUserRequestDto;
 import com.training.springbootbuyitem.entity.request.DispatchItemRequestDto;
 import com.training.springbootbuyitem.entity.request.RestockItemRequestDto;
-import com.training.springbootbuyitem.entity.response.CreateItemResponseDto;
-import com.training.springbootbuyitem.entity.response.GetItemResponseDto;
-import com.training.springbootbuyitem.entity.response.UpdateItemResponseDto;
+import com.training.springbootbuyitem.entity.response.*;
 import com.training.springbootbuyitem.service.ItemService;
+import com.training.springbootbuyitem.service.UserService;
 import com.training.springbootbuyitem.utils.annotation.ServiceOperation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class BuyController implements IBuyController {
 	@Autowired
 	private ItemService itemService;
 
+	@Autowired
+	private UserService userService;
+
 	@RequestMapping("/")
 	public String home(){
 		return "This is what i was looking for";
@@ -48,10 +52,24 @@ public class BuyController implements IBuyController {
 	private ModelMapper mapper;
 
 	@Override
-	@PostMapping
+	@PostMapping("/createItem")
 	@ServiceOperation("createItem")
 	public ResponseEntity<CreateItemResponseDto> createItem(@RequestBody @Valid CreateItemRequestDto request) {
 			return new ResponseEntity<>(mapper.map(itemService.save(mapper.map(request, Item.class)), CreateItemResponseDto.class), HttpStatus.CREATED);
+	}
+
+	@Override
+	@PostMapping("/createUser")
+	@ServiceOperation("createUser")
+	public ResponseEntity<CreateUserResponseDto> createUser(@RequestBody @Valid CreateUserRequestDto request) {
+		return new ResponseEntity<>(mapper.map(userService.save(mapper.map(request, User.class)), CreateUserResponseDto.class), HttpStatus.CREATED);
+	}
+
+	@Override
+	@GetMapping("/user/{id}")
+	@ServiceOperation("getUser")
+	public ResponseEntity<GetUserResponseDto> getUser(@PathVariable("id") Long id) {
+		return new ResponseEntity<>(mapper.map(userService.get(id), GetUserResponseDto.class), HttpStatus.OK);
 	}
 
 	@Override
@@ -70,11 +88,27 @@ public class BuyController implements IBuyController {
 	}
 
 	@Override
+	@PatchMapping("/user/{id}")
+	@ServiceOperation("updateUser")
+	public ResponseEntity<UpdateUserResponseDto> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
+		user.setUserUid(id);
+		return new ResponseEntity<>(mapper.map(userService.update(user), UpdateUserResponseDto.class), HttpStatus.OK);
+	}
+
+	@Override
 	@DeleteMapping("/{id}")
 	@ServiceOperation("deleteItem")
 	public ResponseEntity<HttpStatus> deleteItem(@PathVariable("id") Long id) {
 			itemService.delete(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@Override
+	@DeleteMapping("/{id}")
+	@ServiceOperation("deleteUser")
+	public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") Long id) {
+		userService.delete(id);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
@@ -86,13 +120,20 @@ public class BuyController implements IBuyController {
 	}
 
 	@Override
+	@GetMapping("/user/all")
+	@ServiceOperation("listUsers")
+	public ResponseEntity<List<GetUserResponseDto>> listUsers() {
+		return new ResponseEntity<>(userService.list().stream().map(i -> mapper.map(i, GetUserResponseDto.class)).collect(
+				Collectors.toList()), HttpStatus.OK);
+	}
+
+	@Override
 	@PostMapping("/{id}/dispatch")
 	@ServiceOperation("dispatchItem")
 	public ResponseEntity<HttpStatus> dispatchItem(@PathVariable("id") Long id,
 			@RequestBody DispatchItemRequestDto request) {
 			itemService.dispatch(id, request.getQuantity());
 			return new ResponseEntity<>(HttpStatus.OK);
-	
 	}
 
 	@Override
