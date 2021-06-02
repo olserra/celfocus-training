@@ -104,7 +104,7 @@ public class BuyController implements IBuyController {
 	}
 
 	@Override
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/user/{id}")
 	@ServiceOperation("deleteUser")
 	public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") Long id) {
 		userService.delete(id);
